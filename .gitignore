@@ -1,0 +1,15 @@
+#Ignore Object files and binaries
+*.o
+debug*
+optimize*
+
+#Ignore Temporary files
+*.log
+temp/
+
+#Ignore the Build Directory
+/build/
+
+#ignore Compiled Binary files
+*.exe
+*.out
