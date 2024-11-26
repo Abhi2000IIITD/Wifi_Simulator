@@ -25,10 +25,6 @@ public:
     void addUser(User* user);  // Add user to the AP
     void removeUser(User* user);  // Remove user from AP
 
-    // Calculate throughput and latency
-    double calculateThroughput();
-    double calculateAverageLatency();
-    double calculateMaxLatency();
 
 private:
     FrequencyChannel* channel;

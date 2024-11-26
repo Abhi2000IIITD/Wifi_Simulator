@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "AccessPoint.h"
 #include "User.h"
 #include "Packet.h"
@@ -8,7 +10,7 @@
 using namespace std;
 
 int main() {
-    srand(time(0));  // Seed random number generator for backoff time
+    srand(static_cast<unsigned int>(time(0)));  // Seed random number generator for backoff time
 
     int option;
     do {
@@ -24,9 +26,13 @@ int main() {
 
             for (int count : userCounts) {
                 cout << "\nSimulating with " << count << " users...\n";
-                // Instantiate and simulate Wifi4Protocol
-                Wifi4Protocol wifi4(count);
-                wifi4.startSimulation();
+                try {
+                    // Instantiate and simulate Wifi4Protocol
+                    Wifi4Protocol wifi4(count);
+                    wifi4.startSimulation();
+                } catch (const exception &e) {
+                    cout << "An error occurred during simulation: " << e.what() << "\n";
+                }
             }
         } else if (option != 2) {
             cout << "\nInvalid option. Please try again.\n";

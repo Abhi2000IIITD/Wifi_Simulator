@@ -1,25 +1,30 @@
 #include "WifiProtocol.h"
 #include <iostream>
-#include <cstdlib> // For rand() and srand()
-#include <ctime>
+#include <random>
+#include <algorithm>
 
 using namespace std;
 
 Wifi4Protocol::Wifi4Protocol(int userCount, int maxBackoffTime)
-    : userCount(userCount), maxBackoffTime(maxBackoffTime) {}
+    : userCount(userCount), maxBackoffTime(maxBackoffTime) {
+    resetMetrics();
+}
 
 void Wifi4Protocol::startSimulation() {
-    // Simulate WiFi 4 communication
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dist(1, maxBackoffTime);
+
     cout << "Starting WiFi 4 simulation with " << userCount << " users.\n";
 
-    // Simulate users attempting to transmit
     for (int i = 0; i < userCount; ++i) {
-        double backoffTime = rand() % maxBackoffTime; // Generate random backoff time
-        totalBackoffTime += backoffTime;             // Accumulate total backoff time
-        totalPacketsTransmitted++;                  // Count packets transmitted
+        double backoffTime = dist(gen);
+        totalBackoffTime += backoffTime;
+        totalPacketsTransmitted++;
+        maxBackoffTimeRecorded = max(maxBackoffTimeRecorded, backoffTime);
+        //cout << "User " << i + 1 << " backoff time: " << backoffTime << " ms\n";
     }
 
-    // Display metrics
     cout << "Throughput: " << calculateThroughput() << " Mbps\n";
     cout << "Average Latency: " << calculateLatency() << " ms\n";
     cout << "Max Latency: " << calculateMaxLatency() << " ms\n";
@@ -31,22 +36,39 @@ double Wifi4Protocol::calculateThroughput() {
     double packetSize = 8192.0;             // 1 KB packet size in bits
     double transmissionTime = 60.0 / 1000; // 60 ms in seconds
 
-    // Adjust throughput based on user count
+    // Random factor to simulate real-world variability
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> randomFactor(0.8, 1.0); // Random factor between 0.8 and 1.0
+
     double throughputPerUser = (packetSize / transmissionTime) * modulationEfficiency;
-    double totalThroughput = (bandwidth / userCount) * throughputPerUser; // Divide bandwidth among users
+    double randomBandwidth = bandwidth * randomFactor(gen);  // Randomized bandwidth
+    double totalThroughput = (randomBandwidth / userCount) * throughputPerUser; // Adjust throughput
 
     return totalThroughput / 1e6; // Convert bits per second to Mbps
 }
 
+
 double Wifi4Protocol::calculateLatency() {
-    // Average backoff time is proportional to the number of users
-    double avgBackoffTime = (maxBackoffTime / 2.0) * (1 + (userCount / 10.0)); // Simulate contention
-    double transmissionTime = 60.0; // ms
-    return avgBackoffTime + transmissionTime;
+    if (totalPacketsTransmitted == 0) return 0.0;
+    double avgBackoffTime = totalBackoffTime / totalPacketsTransmitted;
+    return avgBackoffTime + 60.0;
 }
 
 double Wifi4Protocol::calculateMaxLatency() {
-    // Dynamically adjust maxBackoffTime based on user count
-    double dynamicMaxBackoff = maxBackoffTime * (1 + (userCount / 10.0)); // Increase with users
-    return dynamicMaxBackoff + 60.0; // Add transmission time
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> randomOffset(-1, 2); // Random offset in milliseconds (-10 to +20 ms)
+
+    double maxBackoffTime = maxBackoffTimeRecorded + randomOffset(gen); // Add a random offset
+    double transmissionTime = 60.0; // Fixed packet transmission time
+
+    return maxBackoffTime + transmissionTime; // Total max latency
+}
+
+
+void Wifi4Protocol::resetMetrics() {
+    totalBackoffTime = 0.0;
+    maxBackoffTimeRecorded = 0.0;
+    totalPacketsTransmitted = 0;
 }

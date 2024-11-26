@@ -39,17 +39,3 @@ void AccessPoint::removeUser(User* user) {
     users.erase(std::remove(users.begin(), users.end(), user), users.end()); // Use std::remove explicitly
 }
 
-double AccessPoint::calculateThroughput() {
-    // Simple throughput calculation (example)
-    return 100.0;  // Placeholder throughput value
-}
-
-double AccessPoint::calculateAverageLatency() {
-    // Placeholder for average latency calculation
-    return 50.0;  // Placeholder value
-}
-
-double AccessPoint::calculateMaxLatency() {
-    // Placeholder for max latency calculation
-    return 100.0;  // Placeholder value
-}
