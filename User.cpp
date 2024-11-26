@@ -1,38 +1,32 @@
 #include "User.h"
+#include "AccessPoint.h"
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 
-// Constructor
-User::User(int id) : userID(id), totalLatency(0.0), totalPacketsSent(0), maxLatency(0.0) {}
+using namespace std;
 
-// Adds a packet to the user's queue
-void User::addPacket(Packet* packet) {
-    packetQueue.push(packet);
-    std::cout << "Packet with ID " << packet->getPacketID() << " added to User " << userID << "'s queue." << std::endl;
+User::User(int id) : userId(id), packet(new Packet(1024)) {
+    srand(time(0));  // Seed random number generator
 }
 
-// Retrieves the next packet for transmission
-Packet* User::getNextPacket() {
-    if (packetQueue.empty()) {
-        std::cout << "No packets in User " << userID << "'s queue." << std::endl;
-        return nullptr;
+User::~User() {
+    delete packet;
+}
+
+void User::attemptTransmission() {
+    // Simulate transmission attempt
+    AccessPoint* ap = nullptr;  // Placeholder: Ideally, access point should be passed in constructor
+    if (ap != nullptr && ap->isChannelFree()) {
+        ap->transmitPacket(this);
     }
-
-    Packet* nextPacket = packetQueue.front();
-    packetQueue.pop();
-    return nextPacket;
 }
 
-// Adds latency to the user's cumulative total
-void User::addLatency(double latency) {
-    totalLatency += latency;
-    totalPacketsSent++;
-    if (latency > maxLatency) {
-        maxLatency = latency;
-    }
-    std::cout << "Latency " << latency << " ms added for User " << userID << ". Total latency now: " << totalLatency << std::endl;
+void User::backoff(double maxBackoffTime) {
+    // Random backoff time between 0 and maxBackoffTime
+    backoffTime = (rand() % (int)(maxBackoffTime * 1000)) / 1000.0;  // Random time in seconds
 }
 
-// Calculates the average latency per packet
-double User::calculateAverageLatency() const {
-    return totalPacketsSent > 0 ? totalLatency / totalPacketsSent : 0.0;
+int User::getId() const {
+    return userId;
 }

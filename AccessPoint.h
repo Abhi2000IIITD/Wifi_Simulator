@@ -1,4 +1,11 @@
-#pragma once
+#ifndef ACCESSPOINT_H
+#define ACCESSPOINT_H
+
+#include "User.h"
+#include "FrequencyChannel.h"
+#include <vector>
+#include <ctime>
+#include <cstdlib>
 
 #ifdef BUILD_DLL
 #define DLL_EXPORT __declspec(dllexport)
@@ -8,40 +15,25 @@
 #define DLL_EXPORT
 #endif
 
-#include <vector>
-#include <queue>
-#include "User.h"
-#include "FrequencyChannel.h"
-#include "Packet.h"
-
 class DLL_EXPORT AccessPoint {
-private:
-    int apID; // Unique ID for the access point
-    std::vector<User*> connectedUsers; // List of connected users
-    FrequencyChannel* channel; // Associated frequency channel
-    int totalPacketsTransmitted; // Total packets transmitted
-    double totalTime; // Total transmission time
-    std::queue<Packet*> transmissionQueue; // Queue of packets awaiting transmission
-
 public:
-    // Constructor
-    AccessPoint(int id, FrequencyChannel* channel);
+    AccessPoint(int maxUsers);
+    ~AccessPoint();
 
-    // User management
-    void connectUser(User* user);
-    void disconnectUser(int userID);
+    bool isChannelFree();  // Check if the channel is free
+    void transmitPacket(User* user);  // Simulate transmission from a user
+    void addUser(User* user);  // Add user to the AP
+    void removeUser(User* user);  // Remove user from AP
 
-    // Transmission
-    void transmitPacket(Packet* packet, User* user);
-    void handlePacketCollision(Packet* packet);
+    // Calculate throughput and latency
+    double calculateThroughput();
+    double calculateAverageLatency();
+    double calculateMaxLatency();
 
-    // Metrics calculation
-    double calculateThroughput() const;
-    double calculateAverageLatency() const;
-    double calculateMaxLatency() const;
-
-    // Utility
-    int getAPID() const { return apID; }
-    std::vector<User*>& getConnectedUsers() { return connectedUsers; }
-    FrequencyChannel* getChannel() const { return channel; }
+private:
+    FrequencyChannel* channel;
+    std::vector<User*> users;
+    int maxUsers;
 };
+
+#endif

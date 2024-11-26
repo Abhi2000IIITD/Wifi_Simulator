@@ -1,28 +1,33 @@
-# Compiler and flags
-CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17
+# Define the compiler and flags
+CC = g++
+CFLAGS = -g -Wall -std=c++11
+LDFLAGS = -shared
 
-# Source files
-SRC = main.cpp AccessPoint.cpp FrequencyChannel.cpp Packet.cpp User.cpp WifiProtocols.cpp
-OBJ = $(SRC:.cpp=.o)
+# Define source files and object files
+SRC_FILES = $(wildcard ./*.cpp)
+OBJ_FILES = $(SRC_FILES:.cpp=.o)
 
-# Executable
-EXEC = wifi_simulator
+# Output DLL and executable names
+DLL_NAME = libwifi4_sim.dll
+EXE_NAME = run
 
-# Default target
-all: $(EXEC)
+# Define the build rules
+all: $(DLL_NAME) $(EXE_NAME)
 
-# Build the executable
-$(EXEC): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+# Rule to create the DLL
+$(DLL_NAME): $(OBJ_FILES)
+	$(CC) $(LDFLAGS) -o $@ $^
 
-# Compile individual source files
+# Rule to create the executable
+$(EXE_NAME): $(OBJ_FILES)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# Compile source files into object files
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean up
+# Clean up the build files
 clean:
-	rm -f $(OBJ) $(EXEC)
+	rm -f *.o $(DLL_NAME) $(EXE_NAME)
 
-# Phony target
 .PHONY: all clean
