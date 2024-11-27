@@ -21,6 +21,8 @@ public:
     void attemptTransmission();  // Try transmitting packet
     void backoff(double maxBackoffTime);  // Handle backoff behavior
     int getId() const;
+    Packet* getPacket() const { return packet; }
+    double getBackoffTime() const { return backoffTime; }
 
 private:
     int userId;

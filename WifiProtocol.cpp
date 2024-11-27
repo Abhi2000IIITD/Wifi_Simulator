@@ -1,4 +1,5 @@
 #include "WifiProtocol.h"
+#include "User.h"
 #include <iostream>
 #include <random>
 #include <algorithm>
@@ -158,4 +159,85 @@ double Wifi5Protocol::calculateLatency() {
 
 double Wifi5Protocol::calculateMaxLatency() {
     return maxLatency; // Maximum total time for any round
+}
+//==========================================================================
+Wifi6Protocol::Wifi6Protocol(int userCount)
+    : userCount(userCount), subChannelCount(10), currentUserIndex(0), totalDataTransmitted(0), totalTime(0), maxLatency(0) {
+    subChannelSizes.resize(subChannelCount, 2);  // 10 sub-channels, each 2 MHz
+    srand(static_cast<unsigned int>(time(0)));   // Seed for random operations
+}
+
+// In Wifi6Protocol::startSimulation()
+void Wifi6Protocol::startSimulation() {
+    resetMetrics();
+
+    // Ensure the users vector is populated
+    if (users.size() != static_cast<size_t>(userCount)) { // Cast userCount to size_t for correct comparison
+        users.clear();  // Clear existing users (if any)
+        for (int i = 0; i < userCount; ++i) {
+            users.push_back(new User(i));  // Create a new User and add it to the vector
+        }
+    }
+
+    int cycles = userCount / subChannelCount + (userCount % subChannelCount != 0);  // Calculate number of cycles
+
+    // Simulate transmission for each cycle
+    for (int cycle = 0; cycle < cycles; ++cycle) {
+        allocateSubChannels();  // Assign sub-channels to users in a round-robin fashion
+
+        // For each user in this cycle, simulate their transmission
+        for (int i = 0; i < subChannelCount && (cycle * subChannelCount + i) < userCount; ++i) {
+            User* user = users[cycle * subChannelCount + i];
+            if (user == nullptr) {
+                cerr << "Error: Attempted to access an uninitialized user.\n";
+                continue;
+            }
+
+            user->attemptTransmission();
+            totalDataTransmitted += user->getPacket()->getSize();  // Add transmitted data
+
+            // Track latency (from the time the transmission starts)
+            double latency = user->getBackoffTime() + 5.0;  // Backoff + allocated 5ms time
+            totalTime += latency;
+            maxLatency = std::max(maxLatency, latency);
+        }
+    }
+
+    // Output the results after simulation
+    cout << "WiFi 6 Simulation Results:\n";
+    cout << "Throughput: " << calculateThroughput() << " Mbps\n";
+    cout << "Average Latency: " << calculateLatency() << " ms\n";
+    cout << "Max Latency: " << calculateMaxLatency() << " ms\n";
+}
+
+// In Wifi6Protocol::allocateSubChannels() (Only one definition is needed)
+void Wifi6Protocol::allocateSubChannels() {
+    // Round-robin allocation of sub-channels to users
+    for (int i = 0; i < subChannelCount; ++i) {
+        if (currentUserIndex < userCount) {
+            User* user = users[currentUserIndex++];
+            user->backoff(rand() % 5 + 1);  // Random backoff time between 1-5 ms (just an example)
+        }
+    }
+    // Reset the user index after each round
+    currentUserIndex = 0;
+}
+
+double Wifi6Protocol::calculateThroughput() {
+    // Calculate throughput: total data transmitted / total time taken (in Mbps)
+    return (totalDataTransmitted * 8) / (totalTime / 1000);  // Conversion from bytes to bits
+}
+
+double Wifi6Protocol::calculateLatency() {
+    return totalTime / userCount;
+}
+
+double Wifi6Protocol::calculateMaxLatency() {
+    return maxLatency;
+}
+
+void Wifi6Protocol::resetMetrics() {
+    totalDataTransmitted = 0;
+    totalTime = 0;
+    maxLatency = 0;
 }
