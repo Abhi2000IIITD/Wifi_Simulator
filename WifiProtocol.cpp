@@ -163,31 +163,25 @@ double Wifi5Protocol::calculateMaxLatency() {
 //==================================================================================================
 Wifi6Protocol::Wifi6Protocol(int userCount) : numUsers(userCount), totalDataTransmitted(0), maxLatency(0), totalTime(0) {}
 
-// Calculate Latency: Dynamic based on user count and 5ms scheduling
 double Wifi6Protocol::calculateLatency() {
-    // Call the helper function that accepts round as an argument
+   
     return calculateLatencyForRound(numUsers);  
 }
 
 double Wifi6Protocol::calculateLatencyForRound(int round) {
-    // Example logic for round-based latency simulation
-    if (round <= 10) {
-        return rand() % 10 + 10;  // Latency for 1-10 users (10-19 ms)
-    } else if (round <= 20) {
-        return rand() % 20 + 20;  // Latency for 11-20 users (20-39 ms)
-    } else {
-        return rand() % 30 + 40;  // Latency for 21+ users (40-69 ms)
-    }
+ 
+    double baseLatency = 10 + (round / 10) * 5; 
+    double randomVariation = rand() % 10 + 1; 
+    return baseLatency + randomVariation;
 }
+
 double Wifi6Protocol::calculateThroughput() {
-    // Provide default values for data and time
-    double defaultDataTransmitted = 1e6;  // 1 Mbps
-    double defaultTime = 1.0;  // 1 second
+    double defaultDataTransmitted = 1e6;  
+    double defaultTime = 1.0;
 
     return calculateThroughput(defaultDataTransmitted, defaultTime);
 }
 
-// Calculate Throughput: Dynamic based on user count
 double Wifi6Protocol::calculateThroughput(double dataTransmitted, double totalTime) {
     if (totalTime <= 0 || numUsers <= 0) {
         throw std::invalid_argument("Total time and number of users must be positive");
@@ -210,21 +204,18 @@ double Wifi6Protocol::calculateAverageLatency() {
     for (double latency : userLatencies) {
         sumLatencies += latency;
     }
-    return userLatencies.empty() ? 0 : sumLatencies / userLatencies.size();  // Average latency = sum of latencies / number of users
+    return userLatencies.empty() ? 0 : sumLatencies / userLatencies.size();
 }
 
 // Calculate Max Latency: Max latency for all users
 double Wifi6Protocol::calculateMaxLatency() {
-    double roundFactor = 5 * (numUsers / 10);  // 5ms per 10 users (rounds)
-    double finalMaxLatency = roundFactor;
-    
-    // Cap maximum latency at 45 ms for 100 users
-    if (numUsers == 100) {
-        finalMaxLatency = 45.0;
-    }
-    
-    return finalMaxLatency;
+    // Base max latency factor: 5ms per 10 users
+    double baseMaxLatency = 5 * (numUsers / 10);  // 5ms per 10 users (rounds)
+
+    // Return the final calculated max latency (no cap)
+    return baseMaxLatency;
 }
+
 double simulateDataTransmitted(int round) {
     // Example: Simulate data transmitted in bits (adjust logic as needed)
     return 1e6 * round;  // 1 Mbps per round for simplicity
@@ -243,39 +234,47 @@ void Wifi6Protocol::startSimulation() {
     double totalLatency = 0;
     double totalThroughputPerUser = 0;
 
-    // Simulate the transmission for each user
-    std::cout << "Starting simulation for " << numUsers << " users..." << std::endl;
+    // Define the number of subchannels (10 in this case)
+    int numSubchannels = 10;
+    
+    // Ensure we have enough subchannels for all users, if not, you can scale to more rounds
+    int numRounds = (numUsers + numSubchannels - 1) / numSubchannels;  // Round up if users are not exactly divisible by subchannels
 
-    for (int round = 1; round <= numUsers; ++round) {
-    // Simulate data transmitted and total time for the user in the round
-    double dataTransmitted = simulateDataTransmitted(round);  // Example: bits
-    double totalTime = simulateTransmissionTime(round);       // Example: seconds
-    
-    // Calculate latency for the round
-    double latency = calculateLatencyForRound(round);  
-    
-    // Calculate throughput per user for the current round
-    double throughput = calculateThroughput(dataTransmitted, totalTime);  
-    
-    // Store latencies for averaging
-    userLatencies.push_back(latency);
-    
-    // Accumulate total latency and throughput
-    totalLatency += latency;
-    totalThroughputPerUser += throughput;
-}
+    for (int round = 1; round <= numRounds; ++round) {
+        int startIdx = (round - 1) * numSubchannels; // Calculate start user index for this round
+        int endIdx = std::min(startIdx + numSubchannels, numUsers); // Ensure we don't exceed total users
+
+        // Simulate the transmission for each subchannel in the round
+        for (int subchannel = startIdx; subchannel < endIdx; ++subchannel) {
+            // Simulate data transmitted and total time for the user in the current subchannel
+            double dataTransmitted = simulateDataTransmitted(subchannel + 1);  // Example: bits (user index is subchannel + 1)
+            double totalTime = simulateTransmissionTime(subchannel + 1);       // Example: seconds
+
+            // Calculate latency for the current user in the subchannel
+            double latency = calculateLatencyForRound(subchannel + 1);
+
+            // Calculate throughput for the current user in the subchannel
+            double throughput = calculateThroughput(dataTransmitted, totalTime);
+
+            // Store latencies for averaging
+            userLatencies.push_back(latency);
+
+            // Accumulate total latency and throughput
+            totalLatency += latency;
+            totalThroughputPerUser += throughput;
+        }
+    }
 
     // Calculate average latency and average throughput per user
     double avgLatency = totalLatency / numUsers;
     double avgThroughputPerUser = totalThroughputPerUser / numUsers;
 
     // Print simulation results
-    std::cout << "\nWiFi 6 Simulation Results for " << numUsers << " users:" << std::endl;
-    std::cout << "Total Data Transmitted: " << numUsers * 8192 << " bits" << std::endl;
     std::cout << "System Throughput: " << avgThroughputPerUser << " Mbps" << std::endl;
     std::cout << "Average Latency: " << avgLatency << " ms" << std::endl;
     std::cout << "Maximum Latency: " << calculateMaxLatency() << " ms" << std::endl;
 }
+
 
 // Reset Metrics: Reset all metrics for the WiFi 6 simulation
 void Wifi6Protocol::resetMetrics() {
