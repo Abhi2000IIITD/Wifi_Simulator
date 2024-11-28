@@ -3,7 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <algorithm>  // Make sure this is included for std::remove
+#include <algorithm>
 
 using namespace std;
 
@@ -39,3 +39,12 @@ void AccessPoint::removeUser(User* user) {
     users.erase(std::remove(users.begin(), users.end(), user), users.end()); // Use std::remove explicitly
 }
 
+// Define the methods in AccessPoint.cpp
+
+int AccessPoint::getCurrentUsersCount() const {
+    return users.size();  // Returns the number of users currently connected to the AP
+}
+
+FrequencyChannel* AccessPoint::getChannel() const {
+    return channel;  // Returns the current frequency channel
+}

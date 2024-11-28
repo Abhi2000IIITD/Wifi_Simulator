@@ -15,6 +15,7 @@ public:
     bool isFree();  // Check if the channel is free
     void occupy();  // Mark the channel as occupied
     void free();    // Mark the channel as free
+    bool getChannelStatus() const;  // Optionally, return current channel status
 
 private:
     bool channelOccupied;  // Track channel occupancy

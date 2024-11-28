@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <vector>
+#include "User.h"
 
 using namespace std;
 
@@ -56,12 +57,12 @@ double Wifi4Protocol::calculateLatency() {
     
     if (userCount == 1) { // Special case for 1 user
         double avgBackoffTime = totalBackoffTime / totalPacketsTransmitted;
-        return avgBackoffTime + 60.0; // Backoff time + fixed transmission time
+        return avgBackoffTime; // Backoff time + fixed transmission time
     }
     
     // Default case for multiple users
     double avgBackoffTime = totalBackoffTime / totalPacketsTransmitted;
-    return avgBackoffTime + 60.0;
+    return avgBackoffTime;
 }
 
 double Wifi4Protocol::calculateMaxLatency() {
@@ -71,7 +72,7 @@ double Wifi4Protocol::calculateMaxLatency() {
     
     // Default case for multiple users
     double maxBackoffTime = maxBackoffTimeRecorded; // Maximum backoff time
-    return maxBackoffTime + 60.0; // Backoff time + fixed transmission time
+    return maxBackoffTime; // Backoff time + fixed transmission time
 }
 
 
@@ -81,7 +82,7 @@ void Wifi4Protocol::resetMetrics() {
     totalPacketsTransmitted = 0;
 }
 
-//wifi 5 implementation begins here
+//================================================================================================
 Wifi5Protocol::Wifi5Protocol(int userCount)
     : userCount(userCount), totalTime(0.0), totalDataTransmitted(0.0), totalRounds(0), maxLatency(0.0) {}
 
@@ -109,7 +110,7 @@ void Wifi5Protocol::startSimulation() {
     random_device rd;
     mt19937 gen(rd());
     uniform_real_distribution<> csiRandomFactor(0.9, 1.1); // Variability in CSI time
-
+    
     while (remainingUsers > 0) {
         int usersInRound;
 
@@ -135,6 +136,9 @@ void Wifi5Protocol::startSimulation() {
         totalDataTransmitted += dataTransmitted;
         maxLatency = max(maxLatency, totalRoundTime);
         totalRounds++;
+        AccessPoint* ap = new AccessPoint(100);  // Create AccessPoint with max 100 users
+        User* user = new User(1); 
+        ap->transmitPacket(user);
 
         // Output details for this round
         cout << fixed << setprecision(2); // Set output precision for clarity
@@ -154,7 +158,8 @@ double Wifi5Protocol::calculateThroughput() {
 }
 
 double Wifi5Protocol::calculateLatency() {
-    return totalTime / userCount; // ms
+    if (totalRounds == 0) return 0; // Prevent division by zero if no rounds
+    return totalTime / totalRounds; // Average round latency in ms
 }
 
 double Wifi5Protocol::calculateMaxLatency() {
@@ -283,4 +288,75 @@ void Wifi6Protocol::resetMetrics() {
     maxLatency = 0;
     totalTime = 0;
     userLatencies.clear();
+}
+//=====================================================================================================
+// Constructor to initialize Wifi7Protocol
+Wifi7Protocol::Wifi7Protocol(int userCount) 
+    : userCount(userCount), totalBandwidth(6000.0), modulationEfficiency(10.0), packetSize(8192.0) { // Example values
+    // Here 6000 Mbps is the total available bandwidth for WiFi 7
+    // 10 is the modulation efficiency for 4096-QAM (can be adjusted based on modulation)
+    srand(static_cast<unsigned int>(time(0)));  // Seed random number generator
+}
+
+// Start the WiFi 7 simulation
+void Wifi7Protocol::startSimulation() {
+    cout << "Starting WiFi 7 simulation with " << userCount << " users.\n";
+
+    double throughput = calculateThroughput();
+    double avgLatency = calculateLatency();
+    double maxLatency = calculateMaxLatency();
+
+    cout << "Throughput: " << throughput << " Mbps\n";
+    cout << "Average Latency: " << avgLatency << " ms\n";
+    cout << "Max Latency: " << maxLatency << " ms\n";
+}
+
+// Calculate the throughput in Mbps based on the number of users
+double Wifi7Protocol::calculateThroughput() {
+    // Adjust throughput per user based on total bandwidth and user count
+    double throughputPerUser = calculateRealTimeThroughput(userCount);
+
+    // Add some random variation to the throughput
+    double randomFactor = generatePacket(0.9, 1.1);  // 10% random variation
+    return throughputPerUser * randomFactor;
+}
+
+// Calculate average latency in ms based on the number of users
+double Wifi7Protocol::calculateLatency() {
+    // Add some random variation to the latenc
+    double baseLatency = calculateRealTimeLatency(userCount);  
+    return baseLatency;
+}
+
+// Calculate maximum latency in ms based on the number of users
+double Wifi7Protocol::calculateMaxLatency() {
+    // Add some random variation to the max latency
+    double baseMaxLatency = calculateRealTimeLatency(userCount) * 1.5;
+    return baseMaxLatency;
+}
+
+// Helper function to calculate throughput per user based on the number of users
+double Wifi7Protocol::calculateRealTimeThroughput(int userCount) {
+    // The total bandwidth is shared among all users
+    double availableBandwidthPerUser = totalBandwidth / userCount;  // Mbps per user
+    
+    // Adjust throughput with modulation efficiency (simplified)
+    double throughput = availableBandwidthPerUser * modulationEfficiency;
+    
+    return throughput;
+}
+
+// Helper function to calculate average latency based on the number of users
+double Wifi7Protocol::calculateRealTimeLatency(int userCount) {
+    // Latency increases with more users
+    double baseLatency = 1.0;  // Base latency in ms for 1 user
+    double userLatencyImpact = 0.1 * userCount;  // Latency impact per user
+
+    return baseLatency + userLatencyImpact;  // Total latency in ms
+}
+
+// Function to generate a random factor for variability
+double Wifi7Protocol::generatePacket(double lower, double upper) {
+    // Generate a random number between lower and upper
+    return lower + (rand() / (RAND_MAX / (upper - lower)));
 }

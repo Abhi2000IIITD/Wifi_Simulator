@@ -5,7 +5,7 @@
 #include "User.h"
 #include "Packet.h"
 #include "FrequencyChannel.h"
-#include "WifiProtocol.h" // Includes the WifiProtocol, Wifi4Protocol, Wifi5Protocol, Wifi6Protocol classes
+#include "WifiProtocol.h" // Includes the WifiProtocol, Wifi4Protocol, Wifi5Protocol, Wifi6Protocol, Wifi7Protocol classes
 
 using namespace std;
 
@@ -18,7 +18,8 @@ int main() {
         cout << "1) WiFi 4 Simulation\n";
         cout << "2) WiFi 5 Simulation\n";
         cout << "3) WiFi 6 Simulation\n";
-        cout << "4) Exit\n";
+        cout << "4) WiFi 7 Simulation\n";  // Add WiFi 7 option
+        cout << "5) Exit\n";
         cout << "Enter your option: ";
         cin >> option;
 
@@ -64,11 +65,25 @@ int main() {
                     cout << "An error occurred during simulation: " << e.what() << "\n";
                 }
             }
-        } else if (option != 4) {
+        } else if (option == 4) {
+            cout << "\nStarting WiFi 7 Simulation for different user counts...\n";
+            int userCounts[] = {1, 10, 100}; // Define user counts for simulation
+
+            for (int count : userCounts) {
+                cout << "\nSimulating with " << count << " users...\n";
+                try {
+                    // Instantiate and simulate Wifi7Protocol
+                    Wifi7Protocol wifi7(count);  // Assume Wifi7Protocol constructor accepts userCount as a parameter
+                    wifi7.startSimulation();
+                } catch (const exception &e) {
+                    cout << "An error occurred during simulation: " << e.what() << "\n";
+                }
+            }
+        } else if (option != 5) {
             cout << "\nInvalid option. Please try again.\n";
         }
 
-    } while (option != 4); // Loop until option 4 (Exit) is chosen
+    } while (option != 5); // Loop until option 5 (Exit) is chosen
 
     cout << "\nExiting the program.\n";
     return 0;

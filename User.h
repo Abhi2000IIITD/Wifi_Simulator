@@ -2,6 +2,7 @@
 #define USER_H
 
 #include "Packet.h"
+#include "AccessPoint.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -15,7 +16,7 @@
 
 class DLL_EXPORT User {
 public:
-    User(int id);
+    User(int id);  // Constructor that takes an integer ID
     ~User();
 
     void attemptTransmission();  // Try transmitting packet

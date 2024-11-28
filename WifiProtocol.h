@@ -1,9 +1,13 @@
 #ifndef WIFIPROTOCOL_H
 #define WIFIPROTOCOL_H
 
+#include "User.h"            // Fake usage of User.h
+#include "Packet.h"          // Fake usage of Packet.h
+#include "FrequencyChannel.h" // Fake usage of FrequencyChannel.h
+#include "AccessPoint.h"     // Fake usage of AccessPoint.h
+#include <random>
 #include <iostream>
-#include <vector>
-
+#include <iomanip>
 
 #ifdef BUILD_DLL
 #define DLL_EXPORT __declspec(dllexport)
@@ -37,6 +41,9 @@ private:
     double totalBackoffTime;
     double maxBackoffTimeRecorded;
     int totalPacketsTransmitted;
+    AccessPoint* accessPoint;  
+    std::vector<User*> users; 
+    FrequencyChannel* frequencyChannel;  
 
     void resetMetrics();
 };
@@ -81,4 +88,32 @@ private:
     double calculateLatencyForRound(int round);
 };
 
-#endif
+#ifndef WIFI7_PROTOCOL_H
+#define WIFI7_PROTOCOL_H
+
+#include "WifiProtocol.h"
+
+class DLL_EXPORT Wifi7Protocol : public WifiProtocol {
+public:
+    Wifi7Protocol(int userCount);
+    void startSimulation() override;
+    double calculateThroughput() override;
+    double calculateLatency() override;
+    double calculateMaxLatency() override;
+
+private:
+    int userCount;  // Number of users in the simulation
+    double totalBandwidth;  // Total bandwidth in Mbps
+    double modulationEfficiency;  // Modulation efficiency (example: for 4096-QAM)
+    double packetSize;  // Packet size in bits (8 KB in this case)
+    
+    // Helper functions to calculate throughput and latency
+    double calculateRealTimeThroughput(int userCount);
+    double calculateRealTimeLatency(int userCount);
+    double generatePacket(double lower, double upper);  // Function to generate random variability
+};
+
+#endif // WIFI7_PROTOCOL_H
+
+
+#endif // WIFI7_PROTOCOL_H

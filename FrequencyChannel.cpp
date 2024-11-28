@@ -13,3 +13,7 @@ void FrequencyChannel::occupy() {
 void FrequencyChannel::free() {
     channelOccupied = false;
 }
+
+bool FrequencyChannel::getChannelStatus() const {
+    return channelOccupied;  // Returns current status (occupied or free)
+}
