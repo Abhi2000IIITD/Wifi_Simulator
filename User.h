@@ -22,12 +22,13 @@ public:
     void attemptTransmission();  // Try transmitting packet
     void backoff(double maxBackoffTime);  // Handle backoff behavior
     int getId() const;
-    Packet* getPacket() const { return packet; }
-    double getBackoffTime() const { return backoffTime; }
+
+    // Get the packet with the template argument explicitly specified
+    Packet<int>* getPacket() const { return packet; }  // Explicit template argument for Packet<int>
 
 private:
-    int userId;
-    Packet* packet;
+    int userId;  // Declare the user ID first
+    Packet<int>* packet;  // Declare packet pointer of type Packet<int>
     double backoffTime;  // Random backoff time
 };
 

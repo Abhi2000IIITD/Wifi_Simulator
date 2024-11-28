@@ -6,7 +6,7 @@
 
 using namespace std;
 
-User::User(int id) : userId(id), packet(new Packet(1024)) {
+User::User(int id) : userId(id), packet(new Packet<int>(1024)) {  // Specify template argument
     srand(time(0));  // Seed random number generator
 }
 

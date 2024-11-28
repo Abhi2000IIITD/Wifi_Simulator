@@ -1,9 +1,18 @@
 #include "Packet.h"
 
-Packet::Packet(int size) : size(size) {}
-
-Packet::~Packet() {}
-
-int Packet::getSize() const {
-    return size;  // Return the size of the packet
+// Template class definition
+template <typename T>
+Packet<T>::Packet(int size) : size(size) {
+    data = new T[size]; 
 }
+
+template <typename T>
+Packet<T>::~Packet() {
+    delete[] data;  
+}
+
+template <typename T>
+int Packet<T>::getSize() const {
+    return size; 
+}
+

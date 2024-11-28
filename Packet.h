@@ -9,15 +9,22 @@
 #define DLL_EXPORT
 #endif
 
+// Template definition for Packet class
+template <typename T>
 class DLL_EXPORT Packet {
 public:
-    Packet(int size);  // Constructor takes size in bytes
+    // Constructor takes the size in bytes (generic for any type T)
+    Packet(int size);  
     ~Packet();  // Destructor
 
-    int getSize() const;  // Get the size of the packet in bytes
+    // Get the size of the packet in bytes
+    int getSize() const;  
 
 private:
-    int size;  // Packet size in bytes
+    int size;  // Packet size in bytes (this can vary depending on the type T)
+    T* data;   // Pointer to data of type T
 };
+template class DLL_EXPORT Packet<int>;       
+template class DLL_EXPORT Packet<float>;     
 
 #endif
