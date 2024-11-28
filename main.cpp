@@ -9,6 +9,10 @@
 
 using namespace std;
 
+// Define user counts globally, so it can be reused across the program
+const int userCounts[] = {1, 10, 100}; // Define user counts for simulation
+const size_t numUserCounts = sizeof(userCounts) / sizeof(userCounts[0]); // Calculate number of elements in userCounts array
+
 int main() {
     srand(static_cast<unsigned int>(time(0)));  // Seed random number generator for randomness
 
@@ -25,13 +29,11 @@ int main() {
 
         if (option == 1) {
             cout << "\nStarting WiFi 4 Simulation for different user counts...\n";
-            int userCounts[] = {1, 10, 100}; // Define user counts for simulation
-
-            for (int count : userCounts) {
-                cout << "\nSimulating with " << count << " users...\n";
+            for (size_t i = 0; i < numUserCounts; ++i) {
+                cout << "\nSimulating with " << userCounts[i] << " users...\n";
                 try {
                     // Instantiate and simulate Wifi4Protocol
-                    Wifi4Protocol wifi4(count);
+                    Wifi4Protocol wifi4(userCounts[i]);
                     wifi4.startSimulation();
                 } catch (const exception &e) {
                     cout << "An error occurred during simulation: " << e.what() << "\n";
@@ -39,13 +41,11 @@ int main() {
             }
         } else if (option == 2) {
             cout << "\nStarting WiFi 5 Simulation for different user counts...\n";
-            int userCounts[] = {1, 10, 100}; // Define user counts for simulation
-
-            for (int count : userCounts) {
-                cout << "\nSimulating with " << count << " users...\n";
+            for (size_t i = 0; i < numUserCounts; ++i) {
+                cout << "\nSimulating with " << userCounts[i] << " users...\n";
                 try {
                     // Instantiate and simulate Wifi5Protocol
-                    Wifi5Protocol wifi5(count);
+                    Wifi5Protocol wifi5(userCounts[i]);
                     wifi5.startSimulation();
                 } catch (const exception &e) {
                     cout << "An error occurred during simulation: " << e.what() << "\n";
@@ -53,13 +53,11 @@ int main() {
             }
         } else if (option == 3) {
             cout << "\nStarting WiFi 6 Simulation for different user counts...\n";
-            int userCounts[] = {1, 10, 100}; // Define user counts for simulation
-
-            for (int count : userCounts) {
-                cout << "\nSimulating with " << count << " users...\n";
+            for (size_t i = 0; i < numUserCounts; ++i) {
+                cout << "\nSimulating with " << userCounts[i] << " users...\n";
                 try {
                     // Instantiate and simulate Wifi6Protocol
-                    Wifi6Protocol wifi6(count);  // Assume Wifi6Protocol constructor accepts userCount as a parameter
+                    Wifi6Protocol wifi6(userCounts[i]);  // Assume Wifi6Protocol constructor accepts userCount as a parameter
                     wifi6.startSimulation();
                 } catch (const exception &e) {
                     cout << "An error occurred during simulation: " << e.what() << "\n";
@@ -67,13 +65,11 @@ int main() {
             }
         } else if (option == 4) {
             cout << "\nStarting WiFi 7 Simulation for different user counts...\n";
-            int userCounts[] = {1, 10, 100}; // Define user counts for simulation
-
-            for (int count : userCounts) {
-                cout << "\nSimulating with " << count << " users...\n";
+            for (size_t i = 0; i < numUserCounts; ++i) {
+                cout << "\nSimulating with " << userCounts[i] << " users...\n";
                 try {
                     // Instantiate and simulate Wifi7Protocol
-                    Wifi7Protocol wifi7(count);  // Assume Wifi7Protocol constructor accepts userCount as a parameter
+                    Wifi7Protocol wifi7(userCounts[i]);  // Assume Wifi7Protocol constructor accepts userCount as a parameter
                     wifi7.startSimulation();
                 } catch (const exception &e) {
                     cout << "An error occurred during simulation: " << e.what() << "\n";
